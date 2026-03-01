@@ -14,7 +14,7 @@ matchRouter.get('/', async (req, res) => {
     const parsed = listMatchesQuerySchema.safeParse(req.query);
 
     if(!parsed.success){
-        return res.status(400).json({message: "Validation query", errors: parsed.error.errors})
+        return res.status(400).json({message: "Validation query", errors: parsed.error.issues})
     }
     const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT)
 
@@ -34,7 +34,7 @@ matchRouter.post('/', async (req, res) => {
     const parsed = createMatchSchema.safeParse(req.body)
     
     if(!parsed.success){
-        return res.status(400).json({message: "Validation failed", errors: parsed.error.errors})
+        return res.status(400).json({message: "Validation failed", errors: parsed.error.issues})
     }
     
     const {startTime, endTime, homeScore, awayScore} = parsed.data;
@@ -51,6 +51,7 @@ matchRouter.post('/', async (req, res) => {
         }).returning();
         return res.status(201).json({data: event});
     } catch (e){
-        res.status(500).json({message:"Failed to create match Something went wrong", details: JSON.stringify(e), error: e})
+        console.error("Failed to create match:", e);
+        res.status(500).json({message:"Failed to create match Something went wrong"})
     }
 })
